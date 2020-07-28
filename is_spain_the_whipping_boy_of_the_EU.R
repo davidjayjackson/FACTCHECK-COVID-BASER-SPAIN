@@ -1,40 +1,40 @@
-rm(list=ls())
-EUPOP <-read.csv("../DATA/EU_top_10_pop..csv")
-EUPOP$Country <- as.factor(EUPOP$Country)
-barplot(Population~Country,EUPOP, main="Top 10 EU Counties by Population")
-#
-EUCOVID <- read.csv("../DATA/COVID-19-ECDPC-2020-07-28.csv")
-EUCOVID$dateRep <- gsub("/","-",EUCOVID$dateRep)
-EUCOVID$dateRep <- as.Date(EUCOVID$dateRep,format="%m-%d-%Y")
-spain <- subset(EUCOVID,geoId =="ES")
-plot(spain$dateRep,spain$cases,type="l", main="Spain: Total Daily Cases")
-plot(spain$dateRep,spain$deaths,type="l", main="Spain: Total Daily Deaths")
-#
-# EU GeoID codes
-# Spain = ES; Germany = DE, France = FR, Britain = UK, Italy = IT
-# Poland = PL, Romania = RO, Netherlands = NL, Belgium = BE, Greece = EL
-##
-## Germany Plot of Daily Cases and Deaths
-##
-DE <- subset(EUCOVID,geoId =="DE")
-plot(DE$dateRep,DE$cases,type="l", main="Spain vs Germany: Total Daily Cases",col="blue")
-lines(spain$dateRep,spain$cases,col="red")
-legend("topleft",
-       c("Germany","Spain"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.8)
-grid()
-#
-plot(DE$dateRep,DE$deaths,type="l", main="Spain vs Germany: Total Daily Deaths",col="blue")
-lines(spain$dateRep,spain$deaths,col="red")
-legend("topleft",
-       c("Germany","Spain"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.8)
-grid()
-#
+        rm(list=ls())
+        EUPOP <-read.csv("../DATA/EU_top_10_pop..csv")
+        EUPOP$Country <- as.factor(EUPOP$Country)
+        barplot(Population~Country,EUPOP, main="Top 10 EU Counties by Population")
+        #
+        EUCOVID <- read.csv("../DATA/COVID-19-ECDPC-2020-07-28.csv")
+        EUCOVID$dateRep <- gsub("/","-",EUCOVID$dateRep)
+        EUCOVID$dateRep <- as.Date(EUCOVID$dateRep,format="%m-%d-%Y")
+        spain <- subset(EUCOVID,geoId =="ES")
+        plot(spain$dateRep,spain$cases,type="l", main="Spain: Total Daily Cases",ylim=c(0,max(spain$cases)))
+        plot(spain$dateRep,spain$deaths,type="l", main="Spain: Total Daily Deaths",ylim=c(0,max(spain$deaths)))
+        #
+        # EU GeoID codes
+        # Spain = ES; Germany = DE, France = FR, Britain = UK, Italy = IT
+        # Poland = PL, Romania = RO, Netherlands = NL, Belgium = BE, Greece = EL
+        ##
+        ## Germany Plot of Daily Cases and Deaths
+        ##
+        DE <- subset(EUCOVID,geoId =="DE")
+        plot(DE$dateRep,DE$cases,type="l", main="Spain vs Germany: Total Daily Cases",col="blue")
+        lines(spain$dateRep,spain$cases,col="red")
+        legend("topleft",
+               c("Germany","Spain"),
+               col=c("blue","red"),
+               lty = c(1, 1),
+               cex = 0.6)
+        grid()
+        #
+        plot(DE$dateRep,DE$deaths,type="l", main="Spain vs Germany: Total Daily Deaths",col="blue")
+        lines(spain$dateRep,spain$deaths,col="red")
+        legend("topleft",
+               c("Germany","Spain"),
+               col=c("blue","red"),
+               lty = c(1, 1),
+               cex = 0.6)
+        grid()
+        #
 ## France Plots of Daily Cases and Deaths
 ##
 FR <- subset(EUCOVID,geoId =="FR")
@@ -44,7 +44,7 @@ legend("topleft",
        c("France","Spain"),
        col=c("blue","red"),
        lty = c(1, 1),
-       cex = 0.8)
+       cex = 0.6)
 grid()
 #
 plot(FR$dateRep,FR$deaths,type="l", main="Spain vs France: Total Daily Deaths",col="blue")
@@ -53,7 +53,7 @@ legend("topleft",
        c("France","Spain"),
        col=c("blue","red"),
        lty = c(1, 1),
-       cex = 0.8)
+       cex = 0.6)
 grid()
 ##
 ## Great Britain Plots of Daily Cases and Deaths
@@ -65,7 +65,7 @@ legend("topleft",
        c("Great Britain","Spain"),
        col=c("blue","red"),
        lty = c(1, 1),
-       cex = 0.8)
+       cex = 0.6)
 grid()
 
 plot(UK$dateRep,UK$deaths,type="l", main="Spain vs Great Britain: Total Daily Deaths",col="blue")
@@ -74,7 +74,7 @@ legend("topleft",
        c("Great Britain","Spain"),
        col=c("blue","red"),
        lty = c(1, 1),
-       cex = 0.8)
+       cex = 0.6)
 grid()
 ##
 ## Great Poland Plots of Daily Cases and Deaths
@@ -86,17 +86,18 @@ legend("topleft",
        c("Poland","Spain"),
        col=c("blue","red"),
        lty = c(1, 1),
-       cex = 0.8)
+       cex = 0.6)
 grid()
 
 
-plot(PL$dateRep,PL$deaths,type="l", main="Poland: Total Daily Deaths",co="blue")
+plot(PL$dateRep,PL$deaths,type="l", main="Poland: Total Daily Deaths",col="blue")
 lines(spain$dateRep,spain$cases,col="red")
 legend("topleft",
        c("Poland","Spain"),
        col=c("blue","red"),
        lty = c(1, 1),
-       cex = 0.8)
+       cex = 0.6)
+       
 grid()
 ##
 ## Italy  Plots of Daily Cases and Deaths.
@@ -107,7 +108,7 @@ legend("topleft",
        c("Italy","Spain"),
        col=c("blue","red"),
        lty = c(1, 1),
-       cex = 0.8)
+       cex = 0.6)
 grid()
 plot(IT$dateRep,IT$deaths,type="l", main=" Spain vs Italy: Total Daily Deaths",col="blue")
 lines(spain$dateRep,spain$cases,col="red")
@@ -115,7 +116,7 @@ legend("topleft",
        c("Italy","Spain"),
        col=c("blue","red"),
        lty = c(1, 1),
-       cex = 0.8)
+       cex = 0.6)
 grid()
 ##
 ## Combine country cases and deaths into single data.frame
@@ -148,7 +149,7 @@ legend("topleft",
        c("Gang of Five","Spain"),
        col=c("blue","red"),
        lty = c(1, 1),
-       cex = 0.8)
+       cex = 0.6)
 grid()
 
 plot(DEATHSAVG$Group.1,DEATHSAVG$x,type="l", main="EU Gang of 5 + Spain: Mean Daily Deaths",
@@ -158,5 +159,5 @@ legend("topleft",
        c("Gang of Five","Spain"),
        col=c("blue","red"),
        lty = c(1, 1),
-       cex = 0.8)
+       cex = 0.6)
 grid()
