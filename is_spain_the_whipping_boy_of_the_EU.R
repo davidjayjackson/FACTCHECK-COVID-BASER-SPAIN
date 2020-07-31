@@ -1,9 +1,9 @@
 rm(list=ls())
 EUPOP <-read.csv("../DATA/EU_top_10_pop..csv")
 EUPOP$Country <- as.factor(EUPOP$Country)
-barplot(Population~Country,reorder(Country,Population),EUPOP, main="Top 10 EU Counties by Population")
+barplot(Population~Country,EUPOP, main="Top 10 EU Counties by Population")
 #
-EUCOVID <- read.csv("../DATA/COVID-19-ECDPC-2020-07-28.csv")
+EUCOVID <- read.csv("../DATA/COVID-19-ECDPC-2020-07-30.csv")
 EUCOVID$dateRep <- gsub("/","-",EUCOVID$dateRep)
 EUCOVID$dateRep <- as.Date(EUCOVID$dateRep,format="%m-%d-%Y")
 spain <- subset(EUCOVID,geoId =="ES")
@@ -17,7 +17,7 @@ plot(spain$dateRep,spain$deaths,type="l", main="Spain: Total Daily Deaths",ylim=
 ## Germany Plot of Daily Cases and Deaths
 ##
 DE <- subset(EUCOVID,geoId =="DE")
-plot(DE$dateRep,DE$cases,type="l", main="Spain vs Germany: Total Daily Cases",col="blue")
+plot(DE$dateRep,DE$cases,type="l", main="Spain vs Germany: Total Daily Cases",col="blue",ylim=c(0,max(spain$cases)))
 lines(spain$dateRep,spain$cases,col="red")
 legend("topleft",
               c("Germany","Spain"),
@@ -26,7 +26,7 @@ legend("topleft",
               cex = 0.6)
         grid()
         #
-plot(DE$dateRep,DE$deaths,type="l", main="Spain vs Germany: Total Daily Deaths",col="blue")
+plot(DE$dateRep,DE$deaths,type="l", main="Spain vs Germany: Total Daily Deaths",col="blue",ylim=c(10,max(spain$deaths)))
 lines(spain$dateRep,spain$deaths,col="red")
         legend("topleft",
             c("Germany","Spain"),

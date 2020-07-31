@@ -1,0 +1,121 @@
+---
+title: 'Spain Speaks: Spain''s Battle w/ COVID-19'
+author: "David J Jackson"
+date: "7/30/2020"
+output: 
+  html_document: 
+    fig_width: 9
+    fig_height: 6
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Comparing Spain's COVID-19 Cases and Deaths to Top Five EU Cointries 
+* Spain = ES; Germany = DE, France = FR, Britain = UK, Italy = IT
+* Poland = PL, Romania = RO, Netherlands = NL, Belgium = BE, Greece = EL
+
+
+## Import data from European CDPC
+Data Source: https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide
+
+```{r, echo=FALSE}
+EUPOP <-read.csv("../DATA/EU_top_10_pop..csv")
+EUPOP$Country <- as.factor(EUPOP$Country)
+EUCOVID <- read.csv("../DATA/COVID-19-ECDPC-2020-07-31.csv")
+EUCOVID$dateRep <- gsub("/","-",EUCOVID$dateRep)
+EUCOVID$dateRep <- as.Date(EUCOVID$dateRep,format="%m-%d-%Y")
+```
+```{r}
+DE <- subset(EUCOVID,geoId =="DE")
+FR <- subset(EUCOVID,geoId =="FR")
+UK <- subset(EUCOVID,geoId =="UK")
+PL <- subset(EUCOVID,geoId =="PL")
+IT <- subset(EUCOVID,geoId =="PL")
+spain <- subset(EUCOVID,geoId =="ES")
+EUCOMBINED <- rbind(DE,FR,IT,PL,UK)
+```
+```{r}
+summary(EUCOMBINED)
+```
+```{r}
+barplot(Population~Country,EUPOP, main="Top 10 EU Counties by Population")
+#
+```
+
+## Calc Daily Sun and Mean for Cases and Deaths for Gang of 5.
+
+```{r}
+EUTC <- aggregate(x=EUCOMBINED$cases,by=list(EUCOMBINED$dateRep),FUN=sum)
+EUMC <- aggregate(x=EUCOMBINED$cases,by=list(EUCOMBINED$dateRep),FUN=mean)
+```
+
+```{r}
+EUTD <- aggregate(x=EUCOMBINED$deaths,by=list(EUCOMBINED$dateRep),FUN=sum)
+EUMD <- aggregate(x=EUCOMBINED$deaths,by=list(EUCOMBINED$dateRep),FUN=mean)
+```
+```{r}
+plot(EUTC$Group.1,EUTC$x, main="EU Gang of 5 Daily Cases(mean and Sum)",type="l",xlab="Date Reported",ylab="Daily Cases: Mean & Total",col="blue")
+lines(EUMC$Group.1,EUMC$x,col="red")
+legend("topleft",
+       c("Total Cases","Mean Cases"),
+       col=c("blue","red"),
+       lty = c(1, 1),
+       cex = 0.6)
+grid()
+```
+```{r}
+plot(EUTD$Group.1,EUTD$x, main="EU Gang of 5 Daily Deaths(mean and Sun)",type="l",xlab="Date Reported",ylab="Daily Cases: Mean & Total",col="blue")
+lines(EUMD$Group.1,EUMD$x,col="red")
+legend("topleft",
+       c("Total Deaths","Mean Deaths"),
+       col=c("blue","red"),
+       lty = c(1, 1),
+       cex = 0.6)
+grid()
+```
+
+## Compare Spain's Daily Cases and Death to Gang  of 5
+
+```{r}
+plot(EUMC$Group.1,EUMC$x, main="EU Gang of 5 Daily Cases(mean and Sun",type="l",
+     xlab="Date Reported",
+     ylab="Daily Cases: Mean & Total)",col="red",ylim=c(0,max(EUMC$x)))
+lines(spain$dateRep,spain$cases,col="blue")
+legend("topleft",
+       c("Mean Deaths","Spain Deaths"),
+       col=c("blue","red"),
+       lty = c(1, 1),
+       cex = 0.6)
+grid()
+```
+
+## Comparing Spain to UK Daily Cases and Deaths
+
+```{r}
+plot(spain$dateRep,spain$cases, main="Comparing Spain to UK Daily Cases Sun",type="l",
+     xlab="Date Reported",
+     ylab="Daily Cases",col="blue")
+lines(UK$dateRep,UK$cases,col="red",ylim=c(0,max(spain$cases)))
+legend("topleft",
+       c("Spain Cases","UK Cases"),
+       col=c("blue","red"),
+       lty = c(1, 1),
+       cex = 0.6)
+grid()
+```
+
+```{r}
+plot(spain$dateRep,spain$deaths, main="Comparing Spain to UK Daily Deaths Sun",type="l",
+     xlab="Date Reported",
+     ylab="Daily Deaths",
+     ylim=c(0,max(spain$deaths)),col="blue")
+lines(UK$dateRep,UK$deaths,col="red")
+legend("topleft",
+       c("Spain Deaths","UK Deaths"),
+       col=c("blue","red"),
+       lty = c(1, 1),
+       cex = 0.6)
+grid()
+```
