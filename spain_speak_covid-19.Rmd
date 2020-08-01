@@ -18,13 +18,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ## Import data from European CDPC
-Data Source: https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide
+* Data Source: https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide
+* Source Code: https://github.com/davidjayjackson/FACTCHECK-COVID-BASER-SPAIN
+
 
 ```{r, echo=FALSE}
 rm(list=ls())
 EUP <-read.csv("../DATA/EU_top_10_pop..csv")
 EUPOP <- subset(EUP,Population >=30000000)
-EUPOP$Country <- as.factor(EUPOP$Country)
+# EUPOP$Population <- as.factor(EUPOP$Population)
 EUCOVID <- read.csv("../DATA/COVID-19-ECDPC-2020-07-31.csv")
 EUCOVID$dateRep <- gsub("/","-",EUCOVID$dateRep)
 EUCOVID$dateRep <- as.Date(EUCOVID$dateRep,format="%m-%d-%Y")
@@ -43,7 +45,7 @@ EUCOMBINED <- rbind(DE,FR,IT,PL,UK)
 #### Quantile info for Deaths: `r quantile(EUCOMBINED$deaths)`
 
 ```{r,echo=FALSE}
-barplot(Population~Country,EUPOP, main="Top 5 EU Counties by Population")
+barplot(Population~Country,EUPOP, main="Top 6 EU Counties by Population")
 #
 ```
 
