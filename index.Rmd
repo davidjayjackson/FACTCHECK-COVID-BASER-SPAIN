@@ -1,5 +1,5 @@
 ---
-title: 'UNOFFICAL Spain Speaks: Spain''s Battle w/ COVID-19'
+title: 'Spain''s Battle w/ COVID-19'
 author: "David J Jackson"
 date: "August 1,2020"
 output: 
@@ -12,12 +12,12 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Comparing Spain's COVID-19 Cases and Deaths to Top Five EU Cointries 
+### Comparing Spain's COVID-19 Cases and Deaths to Top Five EU Cointries 
 * Spain = ES; Germany = DE, France = FR 
 * Poland = PL,Britain = UK, Italy = IT
 
 
-## Import data from European CDPC
+### Import data from European CDPC
 * Data Source: https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide
 * Source Code: https://github.com/davidjayjackson/FACTCHECK-COVID-BASER-SPAIN
 
@@ -49,7 +49,7 @@ barplot(Population~Country,EUPOP, main="Top 6 EU Counties by Population")
 #
 ```
 
-## Calc Daily Sun and Mean for Cases and Deaths for Gang of 5.
+### Calc Daily Sun and Mean for Cases and Deaths for Gang of 5.
 
 ```{r, echo=FALSE}
 EUTC <- aggregate(x=EUCOMBINED$cases,by=list(EUCOMBINED$dateRep),FUN=sum)
@@ -81,7 +81,7 @@ legend("topleft",
 grid()
 ```
 
-## Compare Spain's Daily Cases and Death to Gang  of 5
+### Compare Spain's Daily Cases and Death to Gang  of 5
 
 ```{r,echo=FALSE}
 plot(EUMC$Group.1,EUMC$x, main="EU Gang of 5 Daily Cases(mean and Sun",type="l",
@@ -107,7 +107,7 @@ legend("topleft",
 grid()
 ```
 
-## Comparing Spain to UK Daily Cases and Deaths
+### Comparing Spain to UK Daily Cases and Deaths
 
 ```{r, echo=FALSE}
 plot(spain$dateRep,spain$cases, main="Comparing Spain to UK Daily Cases Sun",type="l",
@@ -136,7 +136,7 @@ legend("topleft",
 grid()
 ```
 
-## Comparing Spain to Germany Daily Cases and Deaths
+### Comparing Spain to Germany Daily Cases and Deaths
 
 ```{r, echo=FALSE}
 plot(spain$dateRep,spain$cases, main="Comparing Spain to Germany Daily Cases Sun",type="l",
@@ -166,7 +166,7 @@ legend("topleft",
 grid()
 ```
 
-## Comparing Spain to France Daily Cases and Deaths
+### Comparing Spain to France Daily Cases and Deaths
 
 
 ```{r, echo=FALSE}
@@ -196,7 +196,7 @@ legend("topleft",
 grid()
 ```
 
-## Comparing Spain to Italy Daily Cases and Deaths
+### Comparing Spain to Italy Daily Cases and Deaths
 
 ```{r, echo=FALSE}
 plot(spain$dateRep,spain$cases, main="Comparing Spain to Italy Daily Cases Sun",type="l",
@@ -225,7 +225,7 @@ legend("topleft",
 grid()
 ```
 
-## Comparing Spain to Poland Daily Cases and Deaths
+### Comparing Spain to Poland Daily Cases and Deaths
 
 ```{r, echo=FALSE}
 plot(spain$dateRep,spain$cases, main="Comparing Spain to Poland Daily Cases Sun",type="l",
