@@ -1,7 +1,7 @@
 ---
 title: 'Spain''s Battle with COVID-19'
 author: "David J Jackson"
-date: "August 4,2020"
+date: "Aug. 4,2020"
 output: 
   html_document: 
     fig_width: 9
