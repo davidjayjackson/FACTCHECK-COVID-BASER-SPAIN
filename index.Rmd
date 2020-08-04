@@ -27,7 +27,7 @@ rm(list=ls())
 EUP <-read.csv("../DATA/EU_top_10_pop..csv")
 EUPOP <- subset(EUP,Population >=30000000)
 # EUPOP$Population <- as.factor(EUPOP$Population)
-EUCOVID <- read.csv("../DATA/COVID-19-ECDPC-2020-08-03.csv")
+EUCOVID <- read.csv("../DATA/COVID-19-ECDPC-2020-08-04.csv")
 EUCOVID$dateRep <- gsub("/","-",EUCOVID$dateRep)
 EUCOVID$dateRep <- as.Date(EUCOVID$dateRep,format="%m-%d-%Y")
 ```
@@ -247,7 +247,7 @@ plot(spain$dateRep,spain$deaths, main="Comparing Spain to Poland Daily Deaths Su
      ylim=c(0,max(spain$deaths)),col="blue")
 lines(UK$dateRep,UK$deaths,col="red")
 legend("topleft",
-       c("Spain Deaths","UK Deaths"),
+       c("Spain Deaths","Poland Deaths"),
        col=c("blue","red"),
        lty = c(1, 1),
        cex = 0.6)
