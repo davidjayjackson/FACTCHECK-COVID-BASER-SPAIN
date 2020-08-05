@@ -1,7 +1,7 @@
 ---
 title: 'Spain''s Battle with COVID-19'
 author: "David J Jackson"
-date: "Aug. 4,2020"
+date: "Aug. 5,2020"
 output: 
   html_document: 
     fig_width: 9
@@ -27,7 +27,7 @@ rm(list=ls())
 EUP <-read.csv("../DATA/EU_top_10_pop..csv")
 EUPOP <- subset(EUP,Population >=30000000)
 # EUPOP$Population <- as.factor(EUPOP$Population)
-EUCOVID <- read.csv("../DATA/COVID-19-ECDPC-2020-08-04.csv")
+EUCOVID <- read.csv("../DATA/COVID-19-ECDPC-2020-08-05.csv")
 EUCOVID$dateRep <- gsub("/","-",EUCOVID$dateRep)
 EUCOVID$dateRep <- as.Date(EUCOVID$dateRep,format="%m-%d-%Y")
 ```
@@ -84,18 +84,18 @@ grid()
 ### Compare Spain's Daily Cases and Death to Gang  of 5
 
 ```{r,echo=FALSE}
-plot(EUMC$Group.1,EUMC$x, main="EU Gang of 5 Daily Cases(mean and Sun",type="l",
+plot(EUMC$Group.1,EUMC$x, main="EU Gang of 5 Daily Cases(mean and Sum)",type="l",
      xlab="Date Reported",
      ylab="Daily Cases: Mean & Total)",col="red",ylim=c(0,max(EUMC$x)+100))
 lines(spain$dateRep,spain$cases,col="blue")
 legend("topleft",
-       c("Spain's Deaths","Mean Deaths"),
-       col=c("blue","red"),
+       c("Mean Deaths","Spain's Deaths"),
+       col=c("red","blue"),
        lty = c(1, 1),
        cex = 0.6)
 grid()
 
-plot(EUMD$Group.1,EUMD$x, main="EU Gang of 5 Daily Deaths(mean and Sun",type="l",
+plot(EUMD$Group.1,EUMD$x, main="EU Gang of 5 Daily Deaths(mean and Sum",type="l",
      xlab="Date Reported",
      ylab="Daily Deaths",col="red")
 lines(spain$dateRep,spain$deaths,col="blue",ylim=c(0,max(spain$deaths)+100))
