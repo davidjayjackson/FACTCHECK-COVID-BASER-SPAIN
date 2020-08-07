@@ -1,7 +1,7 @@
 ---
 title: 'Spain''s Battle with COVID-19'
 author: "David J Jackson"
-date: "Aug. 6,2020"
+date: "Aug. 7,2020"
 output: 
   html_document: 
     fig_width: 9
@@ -27,7 +27,7 @@ rm(list=ls())
 EUP <-read.csv("../DATA/EU_top_10_pop..csv")
 EUPOP <- subset(EUP,Population >=30000000)
 # EUPOP$Population <- as.factor(EUPOP$Population)
-EUCOVID <- read.csv("../DATA/COVID-19-ECDPC-2020-08-06.csv")
+EUCOVID <- read.csv("../DATA/COVID-19-ECDPC-2020-08-07.csv")
 EUCOVID$dateRep <- gsub("/","-",EUCOVID$dateRep)
 EUCOVID$dateRep <- as.Date(EUCOVID$dateRep,format="%m-%d-%Y")
 ```
