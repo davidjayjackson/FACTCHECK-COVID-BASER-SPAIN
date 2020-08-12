@@ -1,7 +1,7 @@
 ---
 title: 'Spain''s Battle with COVID-19'
 author: "David J Jackson"
-date: "Aug. 10,2020"
+date: "Aug. 12,2020"
 output: 
   html_document: 
     fig_width: 9
@@ -10,6 +10,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(RSQLite)
 ```
 
 ### Comparing Spain's COVID-19 Cases and Deaths to Top Five EU Cointries 
@@ -18,47 +19,52 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ### Import data from European CDPC
-* Data Source: https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide
+* Data Source: https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-Cases-worldwide
 * Source Code: https://github.com/davidjayjackson/FACTCHECK-COVID-BASER-SPAIN
 
 
 ```{r, echo=FALSE}
 rm(list=ls())
-EUP <-read.csv("../DATA/EU_top_10_pop..csv")
-EUPOP <- subset(EUP,Population >=30000000)
-# EUPOP$Population <- as.factor(EUPOP$Population)
-EUCOVID <- read.csv("../DATA/COVID-19-ECDCP-2020-08-10.csv")
-EUCOVID$dateRep <- gsub("/","-",EUCOVID$dateRep)
-EUCOVID$dateRep <- as.Date(EUCOVID$dateRep,format="%m-%d-%Y")
+db <- dbConnect(RSQLite::SQLite(),dbname= "../COVIDDB/COVID.sqlite3")
+ECDC <- dbGetQuery(db,"Select * from ECDC")
+ECDC$Reported <- as.Date(ECDC$Reported)
+
+POP <- dbGetQuery(db,"Select * from EUROpop")
+EUPOP <- subset(POP,Population >=30000000)
+EUPOP$Population <- as.factor(EUPOP$Population)
 ```
 ```{r,echo=FALSE}
-DE <- subset(EUCOVID,geoId =="DE")
-FR <- subset(EUCOVID,geoId =="FR")
-UK <- subset(EUCOVID,geoId =="UK")
-PL <- subset(EUCOVID,geoId =="PL")
-IT <- subset(EUCOVID,geoId =="PL")
-spain <- subset(EUCOVID,geoId =="ES")
-EUCOMBINED <- rbind(DE,FR,IT,PL,UK)
+DE <- subset(ECDC,Countries =="Germany")
+FR <- subset(ECDC,Countries =="Frajcd")
+UK <- subset(ECDC,Countries =="United_Kingdom")
+PL <- subset(ECDC,Countries =="Poland")
+IT <- subset(ECDC,Countries =="Italy")
+spain <- subset(ECDC,Countries =="Spain")
+EUCOMBINED <- rbind(DE,FR,UK,IT)
 ```
 
-#### Quantile info for Cases:  `r quantile(EUCOMBINED$cases)`
-#### Quantile info for Deaths: `r quantile(EUCOMBINED$deaths)`
+#### Quantile info for Cases:  `r quantile(EUCOMBINED$Cases)`
+#### Quantile info for Deaths: `r quantile(EUCOMBINED$Deaths)`
 
 ```{r,echo=FALSE}
-barplot(Population~Country,EUPOP, main="Top 6 EU Counties by Population")
+# barplot(Population~Country,EUPOP, main="Top 6 EU Counties by Population")
 #
 ```
 
 ### Calc Daily Sun and Mean for Cases and Deaths for Gang of 5.
 
 ```{r, echo=FALSE}
-EUTC <- aggregate(x=EUCOMBINED$cases,by=list(EUCOMBINED$dateRep),FUN=sum)
-EUMC <- aggregate(x=EUCOMBINED$cases,by=list(EUCOMBINED$dateRep),FUN=mean)
+EUTC <- aggregate(x=EUCOMBINED$Cases,by=list(EUCOMBINED$Reported),FUN=sum)
+
+#EUTC <- aggregate(Cases~Reported,data=EUCOMBINED,by=Reported,FUN=sum)
+
+
+EUMC <- aggregate(x=EUCOMBINED$Cases,by=list(EUCOMBINED$Reported),FUN=mean)
 ```
 
 ```{r, echo=FALSE}
-EUTD <- aggregate(x=EUCOMBINED$deaths,by=list(EUCOMBINED$dateRep),FUN=sum)
-EUMD <- aggregate(x=EUCOMBINED$deaths,by=list(EUCOMBINED$dateRep),FUN=mean)
+EUTD <- aggregate(x=EUCOMBINED$Deaths,by=list(EUCOMBINED$Reported),FUN=sum)
+EUMD <- aggregate(x=EUCOMBINED$Deaths,by=list(EUCOMBINED$Reported),FUN=mean)
 ```
 ```{r, echo=FALSE}
 plot(EUTC$Group.1,EUTC$x, main="EU Gang of 5 Daily Cases(mean and Sum)",type="l",xlab="Date Reported",ylab="Daily Cases: Mean & Total",col="blue")
@@ -87,7 +93,7 @@ grid()
 plot(EUMC$Group.1,EUMC$x, main="EU Gang of 5 Daily Cases(mean and Sum)",type="l",
      xlab="Date Reported",
      ylab="Daily Cases: Mean & Total)",col="red",ylim=c(0,max(EUMC$x)+100))
-lines(spain$dateRep,spain$cases,col="blue")
+lines(spain$Reported,spain$Cases,col="blue")
 legend("topleft",
        c("Mean Deaths","Spain's Deaths"),
        col=c("red","blue"),
@@ -98,7 +104,7 @@ grid()
 plot(EUMD$Group.1,EUMD$x, main="EU Gang of 5 Daily Deaths(mean and Sum",type="l",
      xlab="Date Reported",
      ylab="Daily Deaths",col="red")
-lines(spain$dateRep,spain$deaths,col="blue",ylim=c(0,max(spain$deaths)+100))
+lines(spain$Reported,spain$Deaths,col="blue",ylim=c(0,max(spain$Deaths)+100))
 legend("topleft",
        c("Mean Deaths","Spain Deaths"),
        col=c("red","blue"),
@@ -110,10 +116,10 @@ grid()
 ### Comparing Spain to UK Daily Cases and Deaths
 
 ```{r, echo=FALSE}
-plot(spain$dateRep,spain$cases, main="Comparing Spain to UK Daily Cases Sun",type="l",
+plot(spain$Reported,spain$Cases, main="Comparing Spain to UK Daily Cases Sun",type="l",
      xlab="Date Reported",
      ylab="Daily Cases",col="blue")
-lines(UK$dateRep,UK$cases,col="red",ylim=c(0,max(spain$cases)+100))
+lines(UK$Reported,UK$Cases,col="red",ylim=c(0,max(spain$Cases)+100))
 legend("topleft",
        c("Spain Cases","UK Cases"),
        col=c("blue","red"),
@@ -123,11 +129,11 @@ grid()
 ```
 
 ```{r, echo=FALSE}
-plot(spain$dateRep,spain$deaths, main="Comparing Spain to UK Daily Deaths Sun",type="l",
+plot(spain$Reported,spain$Deaths, main="Comparing Spain to UK Daily Deaths Sun",type="l",
      xlab="Date Reported",
      ylab="Daily Deaths",
-     ylim=c(0,max(spain$deaths)),col="blue")
-lines(UK$dateRep,UK$deaths,col="red")
+     ylim=c(0,max(spain$Deaths)),col="blue")
+lines(UK$Reported,UK$Deaths,col="red")
 legend("topleft",
        c("Spain Deaths","UK Deaths"),
        col=c("blue","red"),
@@ -139,10 +145,10 @@ grid()
 ### Comparing Spain to Germany Daily Cases and Deaths
 
 ```{r, echo=FALSE}
-plot(spain$dateRep,spain$cases, main="Comparing Spain to Germany Daily Cases Sun",type="l",
+plot(spain$Reported,spain$Cases, main="Comparing Spain to Germany Daily Cases Sun",type="l",
      xlab="Date Reported",
      ylab="Daily Cases",col="blue")
-lines(DE$dateRep,DE$cases,col="red",ylim=c(0,max(spain$cases)))
+lines(DE$Reported,DE$Cases,col="red",ylim=c(0,max(spain$Cases)))
 legend("topleft",
        c("Spain Cases","Germany Cases"),
        col=c("blue","red"),
@@ -152,12 +158,12 @@ grid()
 ```
 
 ```{r, echo=FALSE}
-plot(spain$dateRep,spain$deaths, 
+plot(spain$Reported,spain$Deaths, 
      main="Comparing Spain to Germany Daily Deaths Sun",type="l",
      xlab="Date Reported",
      ylab="Daily Deaths",
-     ylim=c(0,max(spain$deaths)),col="blue")
-lines(DE$dateRep,DE$deaths,col="red")
+     ylim=c(0,max(spain$Deaths)),col="blue")
+lines(DE$Reported,DE$Deaths,col="red")
 legend("topleft",
        c("Spain Deaths","UK Deaths"),
        col=c("blue","red"),
@@ -170,10 +176,10 @@ grid()
 
 
 ```{r, echo=FALSE}
-plot(spain$dateRep,spain$cases, main="Comparing Spain to France Daily Cases Sun",type="l",
+plot(spain$Reported,spain$Cases, main="Comparing Spain to France Daily Cases Sun",type="l",
      xlab="Date Reported",
      ylab="Daily Cases",col="blue")
-lines(FR$dateRep,FR$cases,col="red",ylim=c(0,max(spain$cases)))
+lines(FR$Reported,FR$Cases,col="red",ylim=c(0,max(spain$Cases)))
 legend("topleft",
        c("Spain Cases","France Cases"),
        col=c("blue","red"),
@@ -183,11 +189,11 @@ grid()
 ```
 
 ```{r, echo=FALSE}
-plot(spain$dateRep,spain$deaths, main="Comparing Spain to France Daily Deaths Sun",type="l",
+plot(spain$Reported,spain$Deaths, main="Comparing Spain to France Daily Deaths Sun",type="l",
      xlab="Date Reported",
      ylab="Daily Deaths",
-     ylim=c(0,max(spain$deaths)),col="blue")
-lines(UK$dateRep,UK$deaths,col="red")
+     ylim=c(0,max(spain$Deaths)),col="blue")
+lines(UK$Reported,UK$Deaths,col="red")
 legend("topleft",
        c("Spain Deaths","UK Deaths"),
        col=c("blue","red"),
@@ -199,10 +205,10 @@ grid()
 ### Comparing Spain to Italy Daily Cases and Deaths
 
 ```{r, echo=FALSE}
-plot(spain$dateRep,spain$cases, main="Comparing Spain to Italy Daily Cases Sun",type="l",
+plot(spain$Reported,spain$Cases, main="Comparing Spain to Italy Daily Cases Sun",type="l",
      xlab="Date Reported",
      ylab="Daily Cases",col="blue")
-lines(IT$dateRep,IT$cases,col="red",ylim=c(0,max(spain$cases)))
+lines(IT$Reported,IT$Cases,col="red",ylim=c(0,max(spain$Cases)))
 legend("topleft",
        c("Spain Cases","Italy Cases"),
        col=c("blue","red"),
@@ -212,11 +218,11 @@ grid()
 ```
 
 ```{r, echo=FALSE}
-plot(spain$dateRep,spain$deaths, main="Comparing Spain to Italy Daily Deaths Sun",type="l",
+plot(spain$Reported,spain$Deaths, main="Comparing Spain to Italy Daily Deaths Sun",type="l",
      xlab="Date Reported",
      ylab="Daily Deaths",
-     ylim=c(0,max(spain$deaths)),col="blue")
-lines(IT$dateRep,IT$deaths,col="red")
+     ylim=c(0,max(spain$Deaths)),col="blue")
+lines(IT$Reported,IT$Deaths,col="red")
 legend("topleft",
        c("Spain Deaths","Italy Deaths"),
        col=c("blue","red"),
@@ -228,10 +234,10 @@ grid()
 ### Comparing Spain to Poland Daily Cases and Deaths
 
 ```{r, echo=FALSE}
-plot(spain$dateRep,spain$cases, main="Comparing Spain to Poland Daily Cases Sun",type="l",
+plot(spain$Reported,spain$Cases, main="Comparing Spain to Poland Daily Cases Sun",type="l",
      xlab="Date Reported",
      ylab="Daily Cases",col="blue")
-lines(PL$dateRep,PL$cases,col="red",ylim=c(0,max(spain$cases)))
+lines(PL$Reported,PL$Cases,col="red",ylim=c(0,max(spain$Cases)))
 legend("topleft",
        c("Spain Cases","Poland Cases"),
        col=c("blue","red"),
@@ -241,11 +247,11 @@ grid()
 ```
 
 ```{r, echo=FALSE}
-plot(spain$dateRep,spain$deaths, main="Comparing Spain to Poland Daily Deaths Sun",type="l",
+plot(spain$Reported,spain$Deaths, main="Comparing Spain to Poland Daily Deaths Sun",type="l",
      xlab="Date Reported",
      ylab="Daily Deaths",
-     ylim=c(0,max(spain$deaths)),col="blue")
-lines(UK$dateRep,UK$deaths,col="red")
+     ylim=c(0,max(spain$Deaths)),col="blue")
+lines(UK$Reported,UK$Deaths,col="red")
 legend("topleft",
        c("Spain Deaths","Poland Deaths"),
        col=c("blue","red"),
