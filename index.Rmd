@@ -2,7 +2,10 @@
 title: "Spain's Battle With COVID-19"
 author: "David J Jackson"
 date: "8/12/2020"
-output: html_document
+output: 
+  html_document: 
+    fig_width: 9
+    fig_height: 7
 ---
 
 ```{r setup, include=FALSE,message=FALSE}
