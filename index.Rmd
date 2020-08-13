@@ -23,6 +23,9 @@ df$Reported <- as.Date(df$Reported)
 str(df)
 
 ```
+
+#### 
+
 ```{r}
 US <- subset(df,Reported >="2020-04-01")
 US$MA14 <- movingAverage(US$Cases,14)
