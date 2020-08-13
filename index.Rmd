@@ -1,261 +1,95 @@
 ---
-title: 'Spain''s Battle with COVID-19'
+title: "Spain's Battle With COVID-19"
 author: "David J Jackson"
-date: "Aug. 12,2020"
-output: 
-  html_document: 
-    fig_width: 9
-    fig_height: 6
+date: "8/12/2020"
+output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE,message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(scipen=5)
 library(RSQLite)
 ```
-
-### Comparing Spain's COVID-19 Cases and Deaths to Top Five EU Cointries 
-* Spain = ES; Germany = DE, France = FR 
-* Poland = PL,Britain = UK, Italy = IT
-
-
-### Import data from European CDPC
-* Data Source: https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-Cases-worldwide
-* Source Code: https://github.com/davidjayjackson/FACTCHECK-COVID-BASER-SPAIN
-
-
-```{r, echo=FALSE}
+```{r}
 rm(list=ls())
-db <- dbConnect(RSQLite::SQLite(),dbname= "../COVIDDB/COVID.sqlite3")
-ECDC <- dbGetQuery(db,"Select * from ECDC")
-ECDC$Reported <- as.Date(ECDC$Reported)
+source("../DATA/movavg.R")
+db <- db <- dbConnect(RSQLite::SQLite(),dbname= "../COVIDDB/COVID.sqlite3")
+df <- dbGetQuery(db,"select * from ECDC")
+df <- subset(df,Countries =="Spain" & Cases >0 )
+df$Reported <- as.Date(df$Reported)
+str(df)
 
-POP <- dbGetQuery(db,"Select * from EUROpop")
-EUPOP <- subset(POP,Population >=30000000)
-EUPOP$Population <- as.factor(EUPOP$Population)
 ```
-```{r,echo=FALSE}
-DE <- subset(ECDC,Countries =="Germany")
-FR <- subset(ECDC,Countries =="Frajcd")
-UK <- subset(ECDC,Countries =="United_Kingdom")
-PL <- subset(ECDC,Countries =="Poland")
-IT <- subset(ECDC,Countries =="Italy")
-spain <- subset(ECDC,Countries =="Spain")
-EUCOMBINED <- rbind(DE,FR,UK,IT)
+```{r}
+US <- subset(df,Reported >="2020-04-01")
+US$MA14 <- movingAverage(US$Cases,14)
+plot(US$Reported,US$Cases,type="l",main="Spain's COVID-19 Cases Apr. 1,2020 - Aug. 12, 2020")
+lines(US$Reported,US$MA14,col="red")
+grid(col="black")
 ```
-
-#### Quantile info for Cases:  `r quantile(EUCOMBINED$Cases)`
-#### Quantile info for Deaths: `r quantile(EUCOMBINED$Deaths)`
-
-```{r,echo=FALSE}
-# barplot(Population~Country,EUPOP, main="Top 6 EU Counties by Population")
-#
+```{r}
+US <- subset(df,Reported >="2020-04-01" & Reported <="2020-08-08")
+US$Deaths14 <- movingAverage(US$Deaths,14)
+plot(US$Reported,US$Deaths,type="l",main="Spain's COVID-19 Deaths Apr. 1,2020 - Aug. 12, 2020")
+lines(US$Reported,US$Deaths14,col="red")
+grid(col="black")
 ```
 
-### Calc Daily Sun and Mean for Cases and Deaths for Gang of 5.
+#### Non-Moving Average By Week and By Month
 
-```{r, echo=FALSE}
-EUTC <- aggregate(x=EUCOMBINED$Cases,by=list(EUCOMBINED$Reported),FUN=sum)
+```{r}
+US$Monthly <- as.Date(cut(US$Reported,
+  breaks = "month"))
+US$Weekly <- as.Date(cut(US$Reported,
+  breaks = "week",
+  start.on.monday = FALSE))
 
-#EUTC <- aggregate(Cases~Reported,data=EUCOMBINED,by=Reported,FUN=sum)
+```
+```{r}
+Weekly_Cases <- aggregate(Cases~Weekly,US,FUN=sum)
+Weekly_Deaths <- aggregate(Deaths~Weekly,US,FUN=sum)
 
+```
+```{r}
+barplot(Cases ~Weekly,data=Weekly_Cases,main="Spain's Weekly Barplot of Cases")
+grid(col="black")
+barplot(Deaths ~Weekly,data=Weekly_Deaths,main="Spain's Weekly Barplot of Deaths")
+grid(col="black")
+```
+```{r}
 
-EUMC <- aggregate(x=EUCOMBINED$Cases,by=list(EUCOMBINED$Reported),FUN=mean)
+Monthly_Cases <- aggregate(Cases~Monthly,US,FUN=sum)
+Monthly_Deaths <- aggregate(Deaths~Monthly,US,FUN=sum)
+```
+```{r}
+barplot(Cases ~Monthly,data=Monthly_Cases,main="Spain's Monthly Barplot of Total Cases")
+grid(col="black")
+barplot(Deaths ~Monthly,data=Monthly_Deaths,main="Spain's Monthly Barplot of Total Deaths")
+grid(col="black")
 ```
 
-```{r, echo=FALSE}
-EUTD <- aggregate(x=EUCOMBINED$Deaths,by=list(EUCOMBINED$Reported),FUN=sum)
-EUMD <- aggregate(x=EUCOMBINED$Deaths,by=list(EUCOMBINED$Reported),FUN=mean)
+### Weekly and Monthly Mean COVID-19 Cases And Deaths
+
 ```
-```{r, echo=FALSE}
-plot(EUTC$Group.1,EUTC$x, main="EU Gang of 5 Daily Cases(mean and Sum)",type="l",xlab="Date Reported",ylab="Daily Cases: Mean & Total",col="blue")
-lines(EUMC$Group.1,EUMC$x,col="red")
-legend("topleft",
-       c("Total Cases","Mean Cases"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
+```{r}
+Weekly_Cases <- aggregate(Cases~Weekly,US,FUN=mean)
+Weekly_Deaths <- aggregate(Deaths~Weekly,US,FUN=mean)
+
 ```
-```{r,echo=FALSE}
-plot(EUTD$Group.1,EUTD$x, main="EU Gang of 5 Daily Deaths(mean and Sum)",type="l",xlab="Date Reported",ylab="Daily Cases: Mean & Total",col="blue")
-lines(EUMD$Group.1,EUMD$x,col="red")
-legend("topleft",
-       c("Total Deaths","Mean Deaths"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
+```{r}
+barplot(Cases ~Weekly,data=Weekly_Cases,main="Spain's Weekly Barplot of Mean Cases")
+grid(col="black")
+barplot(Deaths ~Weekly,data=Weekly_Deaths,main="Spain's Weekly Barplot of Mean Deaths")
+grid(col="black")
 ```
+```{r}
 
-### Compare Spain's Daily Cases and Death to Gang  of 5
-
-```{r,echo=FALSE}
-plot(EUMC$Group.1,EUMC$x, main="EU Gang of 5 Daily Cases(mean and Sum)",type="l",
-     xlab="Date Reported",
-     ylab="Daily Cases: Mean & Total)",col="red",ylim=c(0,max(EUMC$x)+100))
-lines(spain$Reported,spain$Cases,col="blue")
-legend("topleft",
-       c("Mean Deaths","Spain's Deaths"),
-       col=c("red","blue"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
-
-plot(EUMD$Group.1,EUMD$x, main="EU Gang of 5 Daily Deaths(mean and Sum",type="l",
-     xlab="Date Reported",
-     ylab="Daily Deaths",col="red")
-lines(spain$Reported,spain$Deaths,col="blue",ylim=c(0,max(spain$Deaths)+100))
-legend("topleft",
-       c("Mean Deaths","Spain Deaths"),
-       col=c("red","blue"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
+Monthly_Cases <- aggregate(Cases~Monthly,US,FUN=mean)
+Monthly_Deaths <- aggregate(Deaths~Monthly,US,FUN=mean)
 ```
-
-### Comparing Spain to UK Daily Cases and Deaths
-
-```{r, echo=FALSE}
-plot(spain$Reported,spain$Cases, main="Comparing Spain to UK Daily Cases Sun",type="l",
-     xlab="Date Reported",
-     ylab="Daily Cases",col="blue")
-lines(UK$Reported,UK$Cases,col="red",ylim=c(0,max(spain$Cases)+100))
-legend("topleft",
-       c("Spain Cases","UK Cases"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
-```
-
-```{r, echo=FALSE}
-plot(spain$Reported,spain$Deaths, main="Comparing Spain to UK Daily Deaths Sun",type="l",
-     xlab="Date Reported",
-     ylab="Daily Deaths",
-     ylim=c(0,max(spain$Deaths)),col="blue")
-lines(UK$Reported,UK$Deaths,col="red")
-legend("topleft",
-       c("Spain Deaths","UK Deaths"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
-```
-
-### Comparing Spain to Germany Daily Cases and Deaths
-
-```{r, echo=FALSE}
-plot(spain$Reported,spain$Cases, main="Comparing Spain to Germany Daily Cases Sun",type="l",
-     xlab="Date Reported",
-     ylab="Daily Cases",col="blue")
-lines(DE$Reported,DE$Cases,col="red",ylim=c(0,max(spain$Cases)))
-legend("topleft",
-       c("Spain Cases","Germany Cases"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
-```
-
-```{r, echo=FALSE}
-plot(spain$Reported,spain$Deaths, 
-     main="Comparing Spain to Germany Daily Deaths Sun",type="l",
-     xlab="Date Reported",
-     ylab="Daily Deaths",
-     ylim=c(0,max(spain$Deaths)),col="blue")
-lines(DE$Reported,DE$Deaths,col="red")
-legend("topleft",
-       c("Spain Deaths","UK Deaths"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
-```
-
-### Comparing Spain to France Daily Cases and Deaths
-
-
-```{r, echo=FALSE}
-plot(spain$Reported,spain$Cases, main="Comparing Spain to France Daily Cases Sun",type="l",
-     xlab="Date Reported",
-     ylab="Daily Cases",col="blue")
-lines(FR$Reported,FR$Cases,col="red",ylim=c(0,max(spain$Cases)))
-legend("topleft",
-       c("Spain Cases","France Cases"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
-```
-
-```{r, echo=FALSE}
-plot(spain$Reported,spain$Deaths, main="Comparing Spain to France Daily Deaths Sun",type="l",
-     xlab="Date Reported",
-     ylab="Daily Deaths",
-     ylim=c(0,max(spain$Deaths)),col="blue")
-lines(UK$Reported,UK$Deaths,col="red")
-legend("topleft",
-       c("Spain Deaths","UK Deaths"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
-```
-
-### Comparing Spain to Italy Daily Cases and Deaths
-
-```{r, echo=FALSE}
-plot(spain$Reported,spain$Cases, main="Comparing Spain to Italy Daily Cases Sun",type="l",
-     xlab="Date Reported",
-     ylab="Daily Cases",col="blue")
-lines(IT$Reported,IT$Cases,col="red",ylim=c(0,max(spain$Cases)))
-legend("topleft",
-       c("Spain Cases","Italy Cases"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
-```
-
-```{r, echo=FALSE}
-plot(spain$Reported,spain$Deaths, main="Comparing Spain to Italy Daily Deaths Sun",type="l",
-     xlab="Date Reported",
-     ylab="Daily Deaths",
-     ylim=c(0,max(spain$Deaths)),col="blue")
-lines(IT$Reported,IT$Deaths,col="red")
-legend("topleft",
-       c("Spain Deaths","Italy Deaths"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
-```
-
-### Comparing Spain to Poland Daily Cases and Deaths
-
-```{r, echo=FALSE}
-plot(spain$Reported,spain$Cases, main="Comparing Spain to Poland Daily Cases Sun",type="l",
-     xlab="Date Reported",
-     ylab="Daily Cases",col="blue")
-lines(PL$Reported,PL$Cases,col="red",ylim=c(0,max(spain$Cases)))
-legend("topleft",
-       c("Spain Cases","Poland Cases"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
-```
-
-```{r, echo=FALSE}
-plot(spain$Reported,spain$Deaths, main="Comparing Spain to Poland Daily Deaths Sun",type="l",
-     xlab="Date Reported",
-     ylab="Daily Deaths",
-     ylim=c(0,max(spain$Deaths)),col="blue")
-lines(UK$Reported,UK$Deaths,col="red")
-legend("topleft",
-       c("Spain Deaths","Poland Deaths"),
-       col=c("blue","red"),
-       lty = c(1, 1),
-       cex = 0.6)
-grid()
+```{r}
+barplot(Cases ~Monthly,data=Monthly_Cases,main="Spain's Monthly Mean Barplot of Cases")
+grid(col="black")
+barplot(Deaths ~Monthly,data=Monthly_Deaths,main="spain's Monthly Mean Barplot of Deaths")
+grid(col="black")
 ```
